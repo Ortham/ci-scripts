@@ -97,8 +97,8 @@ def build_boost(boost_root, libraries):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description = 'Download and build Boost.')
-    parser.add_argument('--directory', required = True)
-    parser.add_argument('--boost-version', required = True)
+    parser.add_argument('--directory', '-d', required = True)
+    parser.add_argument('--boost-version', '-b', required = True)
     parser.add_argument('libraries', nargs = '+', metavar = 'library')
 
     arguments = parser.parse_args()
