@@ -8,17 +8,17 @@ import subprocess
 import sys
 import urllib
 
-def is_library_built(boost_root, library, version):
+def is_library_built(boost_root, library, version, address_model):
     if os.name == 'nt':
         version_stub = version[0:version.rindex('.')].replace('.', '_')
         filename = 'libboost_{}-vc140-mt-s-{}.lib'.format(library, version_stub)
     else:
         filename = 'libboost_{}.a'.format(library)
 
-    return os.path.exists(os.path.join(boost_root, 'stage', 'lib', filename))
+    return os.path.exists(os.path.join(boost_root, 'stage', address_model, 'lib', filename))
 
-def are_libraries_built(boost_root, libraries, version):
-    return all(map(lambda library: is_library_built(boost_root, library, version), libraries))
+def are_libraries_built(boost_root, libraries, version, address_model):
+    return all(map(lambda library: is_library_built(boost_root, library, version, address_model), libraries))
 
 def get_boost_archive_name(version):
     underscored_version = version.replace('.', '_')
@@ -88,6 +88,7 @@ def build_boost(boost_root, address_model, libraries):
         'runtime-link={}'.format(runtime_link),
         'variant=release',
         'address-model={}'.format(address_model),
+        '--stagedir={}'.format(os.path.join('stage', address_model))
     ] + os_arguments + [ '--with-{}'.format(library) for library in libraries ]
 
     print('Running {}...'.format(' '.join(b2_command)))
@@ -105,7 +106,7 @@ if __name__ == "__main__":
     boost_archive_path = os.path.join(arguments.directory, get_boost_archive_name(arguments.boost_version))
     boost_folder_path = os.path.join(arguments.directory, get_extracted_folder_name(boost_archive_path))
 
-    if are_libraries_built(boost_folder_path, arguments.libraries, arguments.boost_version):
+    if are_libraries_built(boost_folder_path, arguments.libraries, arguments.boost_version, arguments.address_model):
         sys.exit(0)
 
     download_boost(arguments.boost_version, boost_archive_path)
