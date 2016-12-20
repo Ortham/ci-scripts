@@ -32,10 +32,14 @@ def is_merged(commit_id, branch):
 def get_branch_versions(bintray_versions, branch):
     return [ version for version in bintray_versions if get_branch(version) == branch ]
 
-def get_default_branch(github_owner, github_repository):
+def get_default_branch(github_owner, github_repository, github_token):
     url = 'https://api.github.com/repos/{}/{}'.format(github_owner, github_repository)
 
-    return json.load(urllib2.urlopen(url))['default_branch']
+    request = urllib2.Request(url)
+    if github_token:
+        request.add_header('Authorization', 'token {}'.format(github_token))
+
+    return json.load(urllib2.urlopen(request))['default_branch']
 
 def get_versions(user, repo, package):
     url = 'https://api.bintray.com/packages/{}/{}/{}'.format(user, repo, package)
@@ -69,12 +73,13 @@ if __name__ == "__main__":
     parser.add_argument('--bintray-repo', '-b', required = True)
     parser.add_argument('--bintray-package', '-p', required = True)
     parser.add_argument('--bintray-token', '-t', required = True)
+    parser.add_argument('--github-token', '-a')
     parser.add_argument('--num-versions-to-keep', '-n', required = True, type = int)
 
     arguments = parser.parse_args()
 
     versions = get_versions(arguments.bintray_user, arguments.bintray_repo, arguments.bintray_package)
-    default_branch = get_default_branch(arguments.github_owner, arguments.github_repo)
+    default_branch = get_default_branch(arguments.github_owner, arguments.github_repo, arguments.github_token)
 
     versions_to_delete = []
     versions_to_keep = []
