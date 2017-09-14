@@ -70,6 +70,11 @@ def build_boost(boost_root, address_model, toolset, libraries):
     if toolset == None:
         toolset = select_toolset()
 
+    if toolset == 'clang':
+        stdlib = '-stdlib=libc++'
+    else:
+        stdlib = ''
+
     if os.name == 'nt':
         extension = '.bat'
         runtime_link = 'static,shared'
@@ -80,9 +85,12 @@ def build_boost(boost_root, address_model, toolset, libraries):
         extension = '.sh'
         runtime_link = 'shared'
         os_arguments = [
-            'cxxflags=-std=c++14 -fPIC',
+            'cxxflags=-std=c++14 -fPIC {}'.format(stdlib),
             'boost.locale.icu=off'
         ]
+
+    if stdlib != '':
+        os_arguments.append('linkflags={}'.format(stdlib))
 
     bootstrap = os.path.join(os.path.abspath(boost_root), 'bootstrap{}'.format(extension))
     print('Running {}...'.format(bootstrap))
