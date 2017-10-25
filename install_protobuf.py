@@ -66,6 +66,9 @@ def download(version, output_path):
 
     urllib.urlretrieve(get_url(version), output_path)
 
+def is_protobuf_installed(output_dir):
+    return os.path.exists(os.path.join(output_dir, 'bin', 'protoc'))
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description = 'Download and build Protocol Buffers.')
     parser.add_argument('--output-directory', '-o', required = True)
@@ -74,7 +77,7 @@ if __name__ == "__main__":
     arguments = parser.parse_args()
 
     output_dir = arguments.output_directory
-    if os.path.exists(output_dir):
+    if is_protobuf_installed(output_dir):
         print('Protocol Buffers already installed at {}'.format(output_dir))
         sys.exit(0)
 
