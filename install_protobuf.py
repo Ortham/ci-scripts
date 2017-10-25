@@ -21,7 +21,8 @@ def build(source_dir, output_dir):
     cmake_command = [
         'cmake',
         '.',
-        '-DCMAKE_INSTALL_PREFIX={}'.format(output_dir)
+        '-DCMAKE_INSTALL_PREFIX={}'.format(output_dir),
+        '-DCMAKE_CXX_STANDARD=14'
     ]
 
     subprocess.check_call(cmake_command, cwd = build_dir)
