@@ -32,7 +32,9 @@ def build(source_dir, output_dir):
         '--build',
         '.',
         '--target',
-        'install'
+        'install',
+        '--config',
+        'release',
     ]
 
     subprocess.check_call(build_command, cwd = build_dir)
@@ -81,7 +83,11 @@ def download(version, output_path):
     urllib.urlretrieve(get_url(version), output_path)
 
 def is_protobuf_installed(output_dir):
-    return os.path.exists(os.path.join(output_dir, 'bin', 'protoc'))
+    executable = 'protoc'
+    if os.name == 'nt':
+        executable += '.exe'
+
+    return os.path.exists(os.path.join(output_dir, 'bin', executable))
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description = 'Download and build Protocol Buffers.')
