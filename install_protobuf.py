@@ -26,9 +26,15 @@ def build(source_dir, output_dir):
 
     subprocess.check_call(cmake_command, cwd = build_dir)
 
-    subprocess.check_call(['make'], cwd = build_dir)
+    build_command = [
+        'cmake',
+        '--build',
+        '.',
+        '--target',
+        'install'
+    ]
 
-    subprocess.check_call(['make', 'install'], cwd = build_dir)
+    subprocess.check_call(build_command, cwd = build_dir)
 
 def extract_archive(archive_path):
     print('Extracting {}...'.format(archive_path))
