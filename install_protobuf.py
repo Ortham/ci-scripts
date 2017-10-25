@@ -9,6 +9,12 @@ import sys
 import tempfile
 import urllib
 
+def get_archive_extension():
+    if os.name == 'nt':
+        return '.zip'
+    else:
+        return '.tar.gz'
+
 def build(source_dir, output_dir):
     build_dir = os.path.join(source_dir, 'cmake')
 
@@ -41,8 +47,9 @@ def extract_archive(archive_path):
     return extracted_path
 
 def get_extracted_path(archive_path):
+    extension_length = -1 * len(get_archive_extension())
     filename = 'protobuf-{}'.format(
-        os.path.splitext(os.path.splitext(archive_path)[0])[0].split('-')[-1]
+        archive_path.split('-')[-1][:extension_length]
     )
     return os.path.join(
         os.path.dirname(archive_path),
@@ -50,7 +57,7 @@ def get_extracted_path(archive_path):
     )
 
 def get_archive_name(version):
-    return 'protobuf-cpp-{}.tar.gz'.format(version)
+    return 'protobuf-cpp-{}{}'.format(version, get_archive_extension())
 
 def get_url(version):
     return 'https://github.com/google/protobuf/releases/download/v{}/{}'.format(
