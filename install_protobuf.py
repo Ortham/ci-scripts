@@ -9,6 +9,11 @@ import sys
 import tempfile
 import urllib
 
+try:
+    from urllib import urlretrieve
+except:
+    from urllib.request import urlretrieve
+
 def get_archive_extension():
     if os.name == 'nt':
         return '.zip'
@@ -80,7 +85,7 @@ def download(version, output_path):
     if os.path.exists(output_path):
         os.remove(output_path)
 
-    urllib.urlretrieve(get_url(version), output_path)
+    urlretrieve(get_url(version), output_path)
 
 def is_protobuf_installed(output_dir):
     executable = 'protoc'
