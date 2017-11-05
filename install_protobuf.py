@@ -7,7 +7,6 @@ import shutil
 import subprocess
 import sys
 import tempfile
-import urllib
 
 try:
     from urllib import urlretrieve

@@ -6,7 +6,11 @@ import os
 import shutil
 import subprocess
 import sys
-import urllib
+
+try:
+    from urllib import urlretrieve
+except:
+    from urllib.request import urlretrieve
 
 def is_library_built(boost_root, library, version, address_model):
     if os.name == 'nt':
@@ -56,7 +60,7 @@ def download_boost(version, destination_path):
     if os.path.exists(destination_path):
         os.remove(destination_path)
 
-    urllib.urlretrieve(get_boost_url(version), destination_path)
+    urlretrieve(get_boost_url(version), destination_path)
 
 def select_toolset():
     if os.name == 'nt':
