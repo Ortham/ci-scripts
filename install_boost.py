@@ -105,7 +105,7 @@ def build_boost(boost_root, address_model, toolset, libraries):
         'toolset={}'.format(toolset),
         'link=static',
         'runtime-link={}'.format(runtime_link),
-        'variant=release',
+        'variant=debug,release',
         'address-model={}'.format(address_model),
         'define=NO_COMPRESSION=1',
         '--stagedir={}'.format(os.path.join('stage', address_model))
