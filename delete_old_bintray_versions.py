@@ -32,8 +32,8 @@ def is_merged(commit_id, branch):
 def get_branch_versions(bintray_versions, branch):
     return [ version for version in bintray_versions if get_branch(version) == branch ]
 
-def get_default_branch(github_owner, github_repository, github_token):
-    url = 'https://api.github.com/repos/{}/{}'.format(github_owner, github_repository)
+def get_default_branch(github_repo_path, github_token):
+    url = 'https://api.github.com/repos/{}'.format(github_repo_path)
 
     request = urllib2.Request(url)
     if github_token:
@@ -41,23 +41,23 @@ def get_default_branch(github_owner, github_repository, github_token):
 
     return json.load(urllib2.urlopen(request))['default_branch']
 
-def get_versions(user, repo, package):
-    url = 'https://api.bintray.com/packages/{}/{}/{}'.format(user, repo, package)
+def get_versions(bintray_package_path):
+    url = 'https://api.bintray.com/packages/{}'.format(bintray_package_path)
 
     response = json.load(urllib2.urlopen(url))
 
-    return response['versions'];
+    return response['versions']
 
-def get_delete_headers(user, api_token):
-    credentials = '{}:{}'.format(user, api_token)
+def get_delete_headers(api_user, api_token):
+    credentials = '{}:{}'.format(api_user, api_token)
     return { 'Authorization': 'Basic {}'.format(base64.b64encode(credentials)) }
 
-def delete_version(user, repo, package, version, api_token):
+def delete_version(bintray_package_path, api_user, api_token):
     print("Deleting from Bintray: {}".format(version))
 
     connection = httplib.HTTPSConnection('api.bintray.com')
-    url_path = '/packages/{}/{}/{}/versions/{}'.format(user, repo, package, version)
-    headers = get_delete_headers(user, api_token)
+    url_path = '/packages/{}/versions/{}'.format(bintray_package_path, version)
+    headers = get_delete_headers(api_user, api_token)
 
     connection.request('DELETE', url_path, None, headers)
     response = connection.getresponse()
@@ -67,19 +67,17 @@ def delete_version(user, repo, package, version, api_token):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description = 'Delete old bintray versions')
-    parser.add_argument('--github-owner', '-o', required = True)
-    parser.add_argument('--github-repo', '-g', required = True)
-    parser.add_argument('--bintray-user', '-u', required = True)
-    parser.add_argument('--bintray-repo', '-b', required = True)
-    parser.add_argument('--bintray-package', '-p', required = True)
-    parser.add_argument('--bintray-token', '-t', required = True)
-    parser.add_argument('--github-token', '-a')
+    parser.add_argument('--github-repo-path', '-g', required = True)
+    parser.add_argument('--bintray-package-path', '-b', required = True)
+    parser.add_argument('--bintray-api-user', '-u', required = True)
+    parser.add_argument('--bintray-api-key', '-k', required = True)
+    parser.add_argument('--github-token', '-t')
     parser.add_argument('--num-versions-to-keep', '-n', required = True, type = int)
 
     arguments = parser.parse_args()
 
-    versions = get_versions(arguments.bintray_user, arguments.bintray_repo, arguments.bintray_package)
-    default_branch = get_default_branch(arguments.github_owner, arguments.github_repo, arguments.github_token)
+    versions = get_versions(arguments.bintray_package_path)
+    default_branch = get_default_branch(arguments.github_repo_path, arguments.github_token)
 
     versions_to_delete = []
     versions_to_keep = []
@@ -102,4 +100,4 @@ if __name__ == "__main__":
         versions_to_delete += unprocessed_versions[first_old_version_index:]
 
     for version in versions_to_delete:
-        delete_version(arguments.bintray_user, arguments.bintray_repo, arguments.bintray_package, version, arguments.bintray_token)
+        delete_version(arguments.bintray_package_path, arguments.bintray_api_user, arguments.bintray_api_key)
