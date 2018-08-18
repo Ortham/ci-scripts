@@ -83,13 +83,14 @@ def build_boost(boost_root, address_model, toolset, libraries):
         extension = '.bat'
         runtime_link = 'static,shared'
         os_arguments = [
-            'threadapi=win32'
+            'threadapi=win32',
+            'cxxflags=/std:c++17'
         ]
     else:
         extension = '.sh'
         runtime_link = 'shared'
         os_arguments = [
-            'cxxflags=-std=c++14 -fPIC {}'.format(stdlib),
+            'cxxflags=-std=c++17 -fPIC {}'.format(stdlib),
             'boost.locale.icu=off'
         ]
 
