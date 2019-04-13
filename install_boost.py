@@ -68,11 +68,14 @@ def select_toolset():
     else:
         return 'gcc'
 
-def build_boost(boost_root, address_model, toolset, libraries):
+def build_boost(boost_root, address_model, toolset, variant, libraries):
     print('Building Boost libraries {} at {}...'.format(libraries, boost_root))
 
     if toolset == None:
         toolset = select_toolset()
+
+    if variant == None:
+        variant = 'release'
 
     if toolset == 'clang':
         stdlib = '-stdlib=libc++'
@@ -106,10 +109,9 @@ def build_boost(boost_root, address_model, toolset, libraries):
         'toolset={}'.format(toolset),
         'link=static',
         'runtime-link={}'.format(runtime_link),
-        'variant=debug,release',
+        'variant={}'.format(variant),
         'address-model={}'.format(address_model),
         'define=NO_COMPRESSION=1',
-        '--layout=versioned',
         '--stagedir={}'.format(os.path.join('stage', address_model))
     ] + os_arguments + [ '--with-{}'.format(library) for library in libraries ]
 
@@ -122,6 +124,7 @@ if __name__ == "__main__":
     parser.add_argument('--boost-version', '-b', required = True)
     parser.add_argument('--address-model', '-a', required = True)
     parser.add_argument('--toolset', '-t')
+    parser.add_argument('--variant', '-v')
     parser.add_argument('libraries', nargs = '+', metavar = 'library')
 
     arguments = parser.parse_args()
@@ -136,4 +139,8 @@ if __name__ == "__main__":
 
     extract_archive(boost_archive_path)
 
-    build_boost(boost_folder_path, arguments.address_model, arguments.toolset, arguments.libraries)
+    build_boost(boost_folder_path,
+        arguments.address_model,
+        arguments.toolset,
+        arguments.variant,
+        arguments.libraries)
