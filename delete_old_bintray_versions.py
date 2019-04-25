@@ -3,11 +3,14 @@
 
 import argparse
 import base64
-import httplib
 import json
 import os
 import subprocess
-import urllib2
+
+try:
+    from urllib2 import Request, urlopen
+except:
+    from urllib.request import Request, urlopen
 
 def get_commit_hash(bintray_version):
     return bintray_version.split('-')[2].split('_')[0][1:]
@@ -25,7 +28,7 @@ def is_in_history(commit_id):
     return return_code == 0
 
 def is_merged(commit_id, branch):
-    branches = subprocess.check_output(['git', 'branch', '--contains', commit_id]).split('\n')
+    branches = subprocess.check_output(['git', 'branch', '--contains', commit_id], universal_newlines=True).split('\n')
 
     return '  {}'.format(branch) in branches or '* {}'.format(branch) in branches
 
@@ -35,34 +38,32 @@ def get_branch_versions(bintray_versions, branch):
 def get_default_branch(github_repo_path, github_token):
     url = 'https://api.github.com/repos/{}'.format(github_repo_path)
 
-    request = urllib2.Request(url)
+    request = Request(url)
     if github_token:
         request.add_header('Authorization', 'token {}'.format(github_token))
 
-    return json.load(urllib2.urlopen(request))['default_branch']
+    return json.load(urlopen(request))['default_branch']
 
 def get_versions(bintray_package_path):
     url = 'https://api.bintray.com/packages/{}'.format(bintray_package_path)
 
-    response = json.load(urllib2.urlopen(url))
+    response = json.load(urlopen(url))
 
     return response['versions']
 
 def get_delete_headers(api_user, api_token):
-    credentials = '{}:{}'.format(api_user, api_token)
-    return { 'Authorization': 'Basic {}'.format(base64.b64encode(credentials)) }
+    credentials_bytes = '{}:{}'.format(api_user, api_token).encode('utf-8')
+    base64_credentials = base64.b64encode(credentials_bytes).decode('ascii')
+    return { 'Authorization': 'Basic {}'.format(base64_credentials) }
 
 def delete_version(bintray_package_path, api_user, api_token):
     print("Deleting from Bintray: {}".format(version))
 
-    connection = httplib.HTTPSConnection('api.bintray.com')
-    url_path = '/packages/{}/versions/{}'.format(bintray_package_path, version)
+    url = 'https://api.bintray.com/packages/{}/versions/{}'.format(bintray_package_path, version)
     headers = get_delete_headers(api_user, api_token)
+    request = Request(url, headers=headers, method='DELETE')
 
-    connection.request('DELETE', url_path, None, headers)
-    response = connection.getresponse()
-
-    if response.status != 200:
+    if urlopen(request).getcode() != 200:
         raise RuntimeError('Failed to delete version. Status: {}, reason: {}'.format(response.status, response.reason))
 
 if __name__ == "__main__":
