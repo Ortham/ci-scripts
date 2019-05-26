@@ -122,25 +122,27 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description = 'Download and build Boost.')
     parser.add_argument('--directory', '-d', required = True)
     parser.add_argument('--boost-version', '-b', required = True)
-    parser.add_argument('--address-model', '-a', required = True)
+    parser.add_argument('--address-model', '-a', default='32')
     parser.add_argument('--toolset', '-t')
     parser.add_argument('--variant', '-v')
-    parser.add_argument('libraries', nargs = '+', metavar = 'library')
+    parser.add_argument('libraries', nargs = '*', metavar = 'library')
 
     arguments = parser.parse_args()
 
     boost_archive_path = os.path.join(arguments.directory, get_boost_archive_name(arguments.boost_version))
     boost_folder_path = os.path.join(arguments.directory, get_extracted_folder_name(boost_archive_path))
 
-    if are_libraries_built(boost_folder_path, arguments.libraries, arguments.boost_version, arguments.address_model):
+    if (os.path.exists(os.path.join(boost_folder_path)) and
+        are_libraries_built(boost_folder_path, arguments.libraries, arguments.boost_version, arguments.address_model)):
         sys.exit(0)
 
     download_boost(arguments.boost_version, boost_archive_path)
 
     extract_archive(boost_archive_path)
 
-    build_boost(boost_folder_path,
-        arguments.address_model,
-        arguments.toolset,
-        arguments.variant,
-        arguments.libraries)
+    if len(arguments.libraries) > 0:
+        build_boost(boost_folder_path,
+            arguments.address_model,
+            arguments.toolset,
+            arguments.variant,
+            arguments.libraries)
