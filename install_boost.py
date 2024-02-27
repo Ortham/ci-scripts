@@ -110,8 +110,7 @@ def build_boost(boost_root, address_model, toolset, variant, libraries):
         'runtime-link={}'.format(runtime_link),
         'variant={}'.format(variant),
         'address-model={}'.format(address_model),
-        'define=NO_COMPRESSION=1',
-        '--stagedir={}'.format(os.path.join('stage', address_model))
+        'define=NO_COMPRESSION=1'
     ] + os_arguments + [ '--with-{}'.format(library) for library in libraries ]
 
     print('Running {}...'.format(' '.join(b2_command)))
