@@ -12,17 +12,16 @@ try:
 except:
     from urllib.request import urlretrieve
 
-def is_library_built(boost_root, library, version, address_model):
+def is_library_built(boost_root, library):
     if os.name == 'nt':
-        version_stub = version[0:version.rindex('.')].replace('.', '_')
-        filename = 'libboost_{}-vc140-mt-s-{}.lib'.format(library, version_stub)
+        # Don't try to work out the appropriate library name on Windows.
+        return False
     else:
         filename = 'libboost_{}.a'.format(library)
+        return os.path.exists(os.path.join(boost_root, 'stage', 'lib', filename))
 
-    return os.path.exists(os.path.join(boost_root, 'stage', address_model, 'lib', filename))
-
-def are_libraries_built(boost_root, libraries, version, address_model):
-    return all(map(lambda library: is_library_built(boost_root, library, version, address_model), libraries))
+def are_libraries_built(boost_root, libraries):
+    return all(map(lambda library: is_library_built(boost_root, library), libraries))
 
 def get_boost_archive_name(version):
     underscored_version = version.replace('.', '_')
@@ -133,7 +132,7 @@ if __name__ == "__main__":
     boost_folder_path = os.path.join(arguments.directory, get_extracted_folder_name(boost_archive_path))
 
     if (os.path.exists(os.path.join(boost_folder_path)) and
-        are_libraries_built(boost_folder_path, arguments.libraries, arguments.boost_version, arguments.address_model)):
+        are_libraries_built(boost_folder_path, arguments.libraries)):
         sys.exit(0)
 
     download_boost(arguments.boost_version, boost_archive_path)
