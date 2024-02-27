@@ -37,7 +37,7 @@ def get_extracted_folder_name(archive_path):
     return os.path.splitext(os.path.splitext(archive_path)[0])[0]
 
 def get_boost_url(version):
-    return u'https://downloads.sourceforge.net/project/boost/boost/{}/{}'.format(version, get_boost_archive_name(version))
+    return u'https://boostorg.jfrog.io/artifactory/main/release/{}/source/{}'.format(version, get_boost_archive_name(version))
 
 def extract_archive(archive_path):
     print('Extracting {}...'.format(archive_path))
